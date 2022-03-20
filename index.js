@@ -36,7 +36,25 @@ app.get('/talker/:id', (req, res) => {
 
 // requisito 3: gerar um token que será passado nas demais requisições
 // e confirmar se as credenciais de login estão corretas
-// app.get()
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  if (!email) return res.status(400).send({ message: 'O campo "email" é obrigatório' });
+  if (!email.includes('@')) {
+    return res.status(400).send({
+      message: 'O "email" deve ter o formato "email@email.com"',
+    });
+  }
+
+  if (!password) return res.status(400).send({ message: 'O campo "password" é obrigatório' });
+  if (password.length < 6) {
+    return res.status(400).send({
+      message: 'O "password" deve ter pelo menos 6 caracteres',
+    });
+  }
+
+  res.status(200).send({ token: '7mqaVRXJSp886CGr' });
+});
 
 app.listen(PORT, () => {
   console.log('Online');
