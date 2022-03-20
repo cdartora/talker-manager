@@ -19,8 +19,22 @@ app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
 
+// requisito 1: retornar "status code 200" junto com o json de talkers
 app.get('/talker', (_req, res) => {
   res.status(200).send(talkers);
+});
+
+// requisito 2: procurar palestrantes via rota dinâmica
+app.get('/talker/:id', (req, res) => {
+  const { id } = req.params; // busca o parâmetro da rota dinâmica
+
+  const talker = talkers.find((t) => t.id === +id); // requisições sempre vem em string
+
+  if (talker) {
+    return res.status(200).send(talker); // retorna para terminar a callback
+  }
+  
+  res.status(404).send({ message: 'Pessoa palestrante não encontrada' });
 });
 
 app.listen(PORT, () => {
