@@ -55,7 +55,7 @@ describe('4 - Crie o endpoint POST /talker', () => {
             expect(require('../talker.json')).toEqual(
               expect.arrayContaining(
                 [expect.objectContaining(postTalkerMock)]
-                )
+              )
             );
             const { json } = responseCreate;
             expect(json).toEqual(postTalkerMock);
