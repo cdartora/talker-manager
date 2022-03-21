@@ -92,7 +92,7 @@ const validateTalker = (req, res, next) => {
 const validateTalk = (req, res, next) => {
   const { talk } = req.body;
 
-  if (!talk || !talk.watchedAt || !talk.rate) {
+  if (!talk || !talk.watchedAt || talk.rate === undefined) {
     return res.status(400).send({
       message: 'O campo "talk" é obrigatório e "watchedAt" e "rate" não podem ser vazios',
     });
@@ -131,6 +131,23 @@ app.post('/talker', validateToken, validateTalker, validateTalk, validateTalkInf
       res.status(201).send(newTalker);
     });
 });
+
+app.put('/talker/:id', validateToken, validateTalker, validateTalk, validateTalkInfo,
+  ((req, res) => {
+    const { id } = req.params;
+
+    const newTalker = req.body;
+    newTalker.id = +id;
+    const talkerFind = req.talker.find((t) => t.id === +id);
+
+    const index = req.talker.indexOf(talkerFind);
+    req.talker.splice(index, 1, newTalker);
+
+    fs.writeFile('talker.json', JSON.stringify(req.talker))
+      .then(() => {
+        res.status(200).send(newTalker);
+      });
+  }));
 
 app.listen(PORT, () => {
   console.log('Online');
