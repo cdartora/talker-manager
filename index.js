@@ -21,6 +21,29 @@ app.get('/talker', (req, res) => {
   res.status(200).send(req.talker);
 });
 
+// middleware de autorização do token
+const validateToken = (req, res, next) => {
+  const { authorization } = req.headers;
+
+  if (authorization === undefined) return res.status(401).send({ message: 'Token não encontrado' });
+  if (authorization.length < 16) return res.status(401).send({ message: 'Token inválido' });
+
+  next();
+};
+
+app.get('/talker/search', validateToken, (req, res) => {
+  const { q } = req.query;
+  console.log(req.query);
+
+  const filteredTalkers = req.talker.filter((t) => t.name.includes(q));
+
+  if (filteredTalkers.length === 0) {
+    return res.status(200).send(req.talker);
+  }
+
+  res.status(200).send(filteredTalkers);
+});
+
 // requisito 2: procurar palestrantes via rota dinâmica
 app.get('/talker/:id', (req, res) => {
   const { id } = req.params; // busca o parâmetro da rota dinâmica
@@ -56,16 +79,6 @@ app.post('/login', (req, res) => {
     res.status(200).send({ token });
   });
 });
-
-// middleware de autorização do token
-const validateToken = (req, res, next) => {
-  const { authorization } = req.headers;
-
-  if (authorization === undefined) return res.status(401).send({ message: 'Token não encontrado' });
-  if (authorization.length < 16) return res.status(401).send({ message: 'Token inválido' });
-
-  next();
-};
 
 // middleware de validação das informações do palestrante
 const validateTalker = (req, res, next) => {
@@ -148,6 +161,21 @@ app.put('/talker/:id', validateToken, validateTalker, validateTalk, validateTalk
         res.status(200).send(newTalker);
       });
   }));
+
+app.delete('/talker/:id', validateToken, (req, res) => {
+  const { id } = req.params;
+
+  const talkerFind = req.talker.find((t) => t.id === +id);
+
+  const index = req.talker.indexOf(talkerFind);
+
+  req.talker.splice(index, 1);
+
+  fs.writeFile('talker.json', JSON.stringify(req.talker))
+    .then(() => {
+      res.status(204).end();
+    });
+});
 
 app.listen(PORT, () => {
   console.log('Online');
